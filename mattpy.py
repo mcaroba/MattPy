@@ -62,7 +62,7 @@ import numpy as np
 # Turns PZ tensor in Voigt notation to vector (preserving the norm)
 # d_ij and e_ij forms have a different vector representation
 def vectorize_pz_voigt(e_voigt, form = None, verbose = True):
- if not form:
+ if not form or form not in ["e", "d"]:
   form = "e"
   if verbose:
    print "                                                                   "
@@ -87,7 +87,19 @@ def vectorize_pz_voigt(e_voigt, form = None, verbose = True):
  return result
 
 # Turns PZ vector (assumed to preserve the norm) to tensor in Voigt notation
-def tensorize_pz_voigt(vector_e_voigt):
+def tensorize_pz_voigt(vector_e_voigt, form = None):
+ if not form or form not in ["e", "d"]:
+  form = "e"
+  if verbose:
+   print "                                                                   "
+   print "************************** W A R N I N G **************************"
+   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
+   print "by default (form = \"e\"). You can also use the d_ij by specifying "
+   print "form = \"d\". Both forms use the same projectors for all the       "
+   print "piezoelectric point groups but have a different normalizing factors"
+   print "in vector representation that need to be accounted for.            "
+   print "************************** W A R N I N G **************************"
+   print " 
  level0=[]
  for i in range(0,3):
   level1=[]
@@ -96,13 +108,28 @@ def tensorize_pz_voigt(vector_e_voigt):
    if j < 3:
     level1.append(vector_e_voigt[k])
    else:
+    if form == "e":
     level1.append(vector_e_voigt[k]/np.sqrt(2.))
+    if form == "d":
+    level1.append(vector_e_voigt[k]*np.sqrt(2.))
   level0.append(level1)
  return level0
 
 
 # Transforms PZ tensor in Voigt notation to Cartesian notation
-def pz_voigt_to_cartesian(e_voigt):
+def pz_voigt_to_cartesian(e_voigt, form = None):
+ if not form or form not in ["e", "d"]:
+  form = "e"
+  if verbose:
+   print "                                                                   "
+   print "************************** W A R N I N G **************************"
+   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
+   print "by default (form = \"e\"). You can also use the d_ij by specifying "
+   print "form = \"d\". Both forms use the same projectors for all the       "
+   print "piezoelectric point groups but have a different normalizing factors"
+   print "in vector representation that need to be accounted for.            "
+   print "************************** W A R N I N G **************************"
+   print " 
  level0=[]
  for i in range(0,3):
   level1=[]
@@ -119,14 +146,29 @@ def pz_voigt_to_cartesian(e_voigt):
       j_voigt=4
      elif (j == 0 and k == 1) or (k == 0 and j == 1):
       j_voigt=5
-    level2.append(e_voigt[i_voigt][j_voigt])
+    if form == "e":
+     level2.append(e_voigt[i_voigt][j_voigt])
+    if form == "d":
+     level2.append(e_voigt[i_voigt][j_voigt]/2.)
    level1.append(level2)
   level0.append(level1)
  return level0
 
 
 # Transforms PZ tensor in Cartesian notation to Voigt notation
-def pz_cartesian_to_voigt(e_cart):
+def pz_cartesian_to_voigt(e_cart, form = None):
+ if not form or form not in ["e", "d"]:
+  form = "e"
+  if verbose:
+   print "                                                                   "
+   print "************************** W A R N I N G **************************"
+   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
+   print "by default (form = \"e\"). You can also use the d_ij by specifying "
+   print "form = \"d\". Both forms use the same projectors for all the       "
+   print "piezoelectric point groups but have a different normalizing factors"
+   print "in vector representation that need to be accounted for.            "
+   print "************************** W A R N I N G **************************"
+   print " 
  level0=[]
  for i_voigt in range(0,3):
   level1=[]
@@ -142,7 +184,10 @@ def pz_cartesian_to_voigt(e_cart):
       j=0 ; k=2
      elif j_voigt == 5:
       j=0 ; k=1
-    level1.append(e_cart[i][j][k])
+    if form == "e":
+     level1.append(e_cart[i][j][k])
+    if form == "d"
+     level1.append(2.*e_cart[i][j][k])
   level0.append(level1)
  return level0
 
@@ -361,9 +406,9 @@ def project_pz(vector_e_voigt, sym = None, verbose = True):
 # given in Voigt notation, in terms of the rotation angles
 def res_pz(t, e_voigt, sym = None, form = None, verbose = True):
  tx=t[0] ; ty=t[1] ; tz=t[2]
- e_cart=pz_voigt_to_cartesian(e_voigt)
+ e_cart=pz_voigt_to_cartesian(e_voigt, form = form)
  rot_e=rotate_pz(e_cart,[tx,ty,tz])
- rot_e_voigt=pz_cartesian_to_voigt(rot_e)
+ rot_e_voigt=pz_cartesian_to_voigt(rot_e, form = form)
  rot_vector=vectorize_pz_voigt(rot_e_voigt, form = form, verbose = verbose)
  proj_rot_vector=project_pz(rot_vector,sym, verbose = verbose)
  res=rot_vector-proj_rot_vector
@@ -429,9 +474,9 @@ def pz_dist(e_voigt, form = None,
    topt = [0., 0., 0.]
    if sym != "iso" or sym not in cspointgroups:
     topt = fmin(res_pz, x0=[0,0,0], xtol=xtol, args=(e_voigt, sym, form, verbose), disp=disp)
-   et = pz_voigt_to_cartesian(e_voigt)
+   et = pz_voigt_to_cartesian(e_voigt, form = form)
    rotet = rotate_pz(et, topt)
-   rot_voigt = pz_cartesian_to_voigt(rotet)
+   rot_voigt = pz_cartesian_to_voigt(rotet, form = form)
    v = vectorize_pz_voigt(rot_voigt, form = form, verbose = False)
    vp = project_pz(v, sym = sym, verbose=False)
    edist2 = np.dot(v-vp,v-vp)
@@ -583,7 +628,7 @@ def ela_cartesian_to_voigt(c_cart):
 
 
 # Performs a rotation operation on a (Cartesian) rank-4 tensor
-def rotate_ela(c_cart,rot_angles):
+def rotate_ela(c_cart, rot_angles):
  result=np.zeros((3,3,3,3))
  tx=rot_angles[0] ; ty=rot_angles[1] ; tz=rot_angles[2]
  Rx=[[1., 0., 0.], [0., np.cos(tx), 0.-np.sin(tx)], [0., np.sin(tx), np.cos(tx)]]
