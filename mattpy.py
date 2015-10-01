@@ -99,7 +99,7 @@ def tensorize_pz_voigt(vector_e_voigt, form = None):
    print "piezoelectric point groups but have a different normalizing factors"
    print "in vector representation that need to be accounted for.            "
    print "************************** W A R N I N G **************************"
-   print " 
+   print "                                                                   "
  level0=[]
  for i in range(0,3):
   level1=[]
@@ -109,9 +109,9 @@ def tensorize_pz_voigt(vector_e_voigt, form = None):
     level1.append(vector_e_voigt[k])
    else:
     if form == "e":
-    level1.append(vector_e_voigt[k]/np.sqrt(2.))
+     level1.append(vector_e_voigt[k]/np.sqrt(2.))
     if form == "d":
-    level1.append(vector_e_voigt[k]*np.sqrt(2.))
+     level1.append(vector_e_voigt[k]*np.sqrt(2.))
   level0.append(level1)
  return level0
 
@@ -129,7 +129,7 @@ def pz_voigt_to_cartesian(e_voigt, form = None):
    print "piezoelectric point groups but have a different normalizing factors"
    print "in vector representation that need to be accounted for.            "
    print "************************** W A R N I N G **************************"
-   print " 
+   print "                                                                   "
  level0=[]
  for i in range(0,3):
   level1=[]
@@ -168,7 +168,7 @@ def pz_cartesian_to_voigt(e_cart, form = None):
    print "piezoelectric point groups but have a different normalizing factors"
    print "in vector representation that need to be accounted for.            "
    print "************************** W A R N I N G **************************"
-   print " 
+   print "                                                                   "
  level0=[]
  for i_voigt in range(0,3):
   level1=[]
@@ -186,7 +186,7 @@ def pz_cartesian_to_voigt(e_cart, form = None):
       j=0 ; k=1
     if form == "e":
      level1.append(e_cart[i][j][k])
-    if form == "d"
+    if form == "d":
      level1.append(2.*e_cart[i][j][k])
   level0.append(level1)
  return level0
