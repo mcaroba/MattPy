@@ -1,0 +1,47 @@
+************************************************************************
+GETTING STARTED
+
+To get started using MattPy in a "quick and dirty" way, you can simply
+download mattpy.py to a local directory on your machine, and from
+a Python interactive session or within a Python script simply use the
+execfile("/path/to/file/mattpy.py") command, where /path/to/file/ is
+the directory where you downloaded mattpy.py. The recommended way to
+install MattPy, however, is to install it as a Python module so that it
+can be imported both interactively and from a script without the need
+to keep track of the source file location. To do this, you can create a
+directory where you store the mattpy.py file and add it to your Python
+path. In a Linux shell this would be something along these lines:
+
+************************************************************************
+# Create modules directory under your home
+mkdir ~/python_modules
+
+# Download mattpy.py
+wget https://github.com/mcaroba/MattPy/blob/master/mattpy.py ~/python_modules/.
+
+# Add directory to your Python path
+echo "export PYTHONPATH=\${PYTHONPATH}:~/python_modules" >> ~/.bashrc
+source ~/.bashrc
+************************************************************************
+
+If you don't use bash as your default shell then you'll need to change
+to whatever the configuration file is in your case. Now you can import
+MattPy as you would do with any other Python module:
+
+************************************************************************
+# Import with mattpy prefix, i.e. function() becomes mattpy.function()
+import mattpy
+
+# Import with custom prefix, e.g. function() becomes mp.function()
+import mattpy as mp
+
+# Import with mattpy original naming, i.e. function() stays function()
+from mattpy import *
+************************************************************************
+
+DEPENDENCIES
+
+MattPy relies on NumPy for all its functionalities and SciPy for some of
+them. You need to install these packages if you have not already done
+so.
+************************************************************************
