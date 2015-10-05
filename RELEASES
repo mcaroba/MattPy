@@ -1,0 +1,18 @@
+-----------------------------------------------------------------------
+01 October 2015
+
+MattPy v0.1 first release:
+
+* Basic functionalities for piezoelectric and elastic tensors
+  manipulation: rotations, transformation between different tensor
+  (Voigt and Cartesian) and vector forms
+
+* Projection scheme available with and without rotation optimization:
+  all the projectors for all the point groups are available
+
+* Documentation is lacking: only the description of the elasticity
+  routines and one simple example is given
+
+* Access to the functionalities is a bit rough at the moment, alias
+  functions and a bit more automation for tensor recognition should
+  be implemented

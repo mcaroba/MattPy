@@ -1,0 +1,10 @@
+-----------------------------------------------------------------------
+Todo list:
+
+* F001: Implement tensor form recognition so that all functions can be used
+  without the user's need to specify the form of the tensor (exept for
+  "d" versus "e" form of the PZ tensor)
+
+* F002: Extend documentation to include the definition of PZ functions
+-----------------------------------------------------------------------
+Granted:
