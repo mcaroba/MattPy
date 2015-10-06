@@ -275,7 +275,7 @@ def project_pz(vector_e_voigt, sym = None, verbose = True):
 # point group compatible with that class will be assigned when the class
 # has more than one independent form for the piezoelectric tensor (i.e. the two
 # forms differ by more than modulo a rotation) 
- defaultpg = {"cub": "-43m", "hex": "6mm", "tig": "3m", "tet": "4mm", "ort" :"222", "mon": "2", "tric": "1"}
+ defaultpg = {"cub": "-43m", "hex": "6mm", "tig": "3m", "tet": "4mm", "ort" :"222", "mon": "2", "tic": "1"}
  if defaultpg.get(sym):
   oldsym = sym
   sym = defaultpg[oldsym]
