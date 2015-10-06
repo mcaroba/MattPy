@@ -117,7 +117,7 @@ def tensorize_pz_voigt(vector_e_voigt, form = None):
 
 
 # Transforms PZ tensor in Voigt notation to Cartesian notation
-def pz_voigt_to_cartesian(e_voigt, form = None):
+def pz_voigt_to_cartesian(e_voigt, form = None, verbose = True):
  if not form or form not in ["e", "d"]:
   form = "e"
   if verbose:
@@ -156,7 +156,7 @@ def pz_voigt_to_cartesian(e_voigt, form = None):
 
 
 # Transforms PZ tensor in Cartesian notation to Voigt notation
-def pz_cartesian_to_voigt(e_cart, form = None):
+def pz_cartesian_to_voigt(e_cart, form = None, verbose = True):
  if not form or form not in ["e", "d"]:
   form = "e"
   if verbose:
