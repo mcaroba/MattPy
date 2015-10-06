@@ -87,7 +87,7 @@ def vectorize_pz_voigt(e_voigt, form = None, verbose = True):
  return result
 
 # Turns PZ vector (assumed to preserve the norm) to tensor in Voigt notation
-def tensorize_pz_voigt(vector_e_voigt, form = None):
+def tensorize_pz_voigt(vector_e_voigt, form = None, verbose = True):
  if not form or form not in ["e", "d"]:
   form = "e"
   if verbose:
