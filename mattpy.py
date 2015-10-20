@@ -12,7 +12,7 @@
 #                                                                      @@@       # 
 #                                                                   @@@@@        #                    
 #                                                                                #
-#                               MattPy v0.1                                      #
+#                               MattPy v0.2                                      #
 #                                                                                #
 #     The following distribution of Python functions for material tensor         #
 #         analysis, collectively known as MattPy, has been written by            #
@@ -43,7 +43,7 @@
 #                        Tensor of Lower Symmetry"                               #
 #                    Journal of Elasticity 85, 215 (2006)                        #
 #                                                                                #
-###             Distribution last updated on 30 Sept. 2015                     ###
+###               Distribution last updated on 20 Oct. 2015                    ###
 #####                                                                        #####
 ##################################################################################
 ##################################################################################
@@ -55,25 +55,471 @@
 import numpy as np
 
 
+##################################################################################
+##################################################################################
+##### Create the Tensor class and define some basic functions                #####
+##################################################################################
+##################################################################################
+# Tensor class
+class Tensor:
+# Initialization
+ def __init__(self, tensor, form = None, normalized = False, verbose = True):
+  self.verbose = verbose
+  self.normalized = normalized
+  shape = check_shape(tensor, verbose)
+  self.shape = shape
+# Process a piezoelectric tensor
+  if shape[0] == "piezoelectric":
+   if not form or form not in ["e", "d"]:
+    print_no_form_warning(verbose)
+    form = "e"
+   if shape[1] == "voigt":
+    voigt = symmetrize_tensor(tensor, shape, verbose)
+    cartesian = pz_voigt_to_cartesian(voigt, form)
+    vector = vectorize_pz_voigt(voigt, form)
+   if shape[1] == "cartesian":
+    cartesian = symmetrize_tensor(tensor, shape, verbose)
+    voigt = pz_cartesian_to_voigt(cartesian, form)
+    vector = vectorize_pz_voigt(voigt, form)
+   if shape[1] == "vector":
+    if not normalized:
+     vector = normalize_pz_vector(tensor, form)
+    else:
+     vector = tensor
+    voigt = tensorize_pz_voigt(vector, form)
+    cartesian = pz_voigt_to_cartesian(voigt, form)
+# Process an elastic tensor
+  if shape[0] == "elastic":
+   if shape[1] == "voigt":
+    voigt = symmetrize_tensor(tensor, shape, verbose)
+    cartesian = ela_voigt_to_cartesian(voigt)
+    vector = vectorize_ela_voigt(voigt)
+   if shape[1] == "cartesian":
+    cartesian = symmetrize_tensor(tensor, shape, verbose)
+    voigt = ela_cartesian_to_voigt(cartesian)
+    vector = vectorize_ela_voigt(voigt)
+   if shape[1] == "vector":
+    if not normalized:
+     vector = normalize_ela_vector(tensor)
+    else:
+     vector = tensor
+    voigt = tensorize_ela_voigt(vector)
+    cartesian = ela_voigt_to_cartesian(voigt)
+# Other stuff
+  components = get_components(voigt, shape)
+# Pass values to self
+  self.form = form
+  self.vector = vector
+  self.voigt = voigt
+  self.cartesian = cartesian
+  self.components = components
+# Define intrinsic methods
+# Rotate method
+ def rotate(self, angles):
+  form = self.form
+  shape = self.shape
+  if shape[0] == "piezoelectric":
+   cartesian = rotate_pz(self.cartesian, angles)
+   voigt = pz_cartesian_to_voigt(cartesian, form)
+   vector = vectorize_pz_voigt(voigt, form)
+  if shape[0] == "elastic":
+   cartesian = rotate_ela(self.cartesian, angles)
+   voigt = ela_cartesian_to_voigt(cartesian)
+   vector = vectorize_ela_voigt(voigt)
+  components = get_components(voigt, shape)
+  self.vector = vector
+  self.voigt = voigt
+  self.cartesian = cartesian
+  self.components = components
+# Project method
+ def get_projection(self, sym = None, shapeout = None, verbose = None):
+  if verbose == None:
+   verbose = self.verbose
+  shape = self.shape
+  normalized = self.normalized
+  form = self.form
+  if shapeout == None:
+   if shape[1] == "vector" and not normalized:
+    shapeout = "components"
+   else:
+    shapeout = shape[1]
+  if shape[0] == "piezoelectric":
+   proj = project_pz(self.vector, sym, verbose)
+   vector = []
+   for i in range(0,18):
+    vector.append(proj[i])
+   voigt = tensorize_pz_voigt(vector, form)
+   components = get_components(voigt, shape)
+   cartesian = pz_voigt_to_cartesian(voigt, form)
+  if shape[0] == "elastic":
+   proj = project_ela(self.vector, sym, verbose)
+   vector = []
+   for i in range(0,21):
+    vector.append(proj[i])
+   voigt = tensorize_ela_voigt(vector)
+   components = get_components(voigt, shape)
+   cartesian = ela_voigt_to_cartesian(voigt)
+  if shapeout == "vector":
+   return vector
+  if shapeout == "components":
+   return components
+  if shapeout == "voigt":
+   return voigt
+  if shapeout == "cartesian":
+   return cartesian
+# Distances method
+ def get_distances(self, form = None, symlist = None,
+                   rotate = False, xtol = 1e-8, verbose = None, printmin = False):
+  if verbose == None:
+   verbose = self.verbose
+  if form == None:
+   form = self.form
+  shape = self.shape
+  if symlist == None:
+   if shape[0] == "piezoelectric":
+    symlist = ["432", "-43m", "6", "-6", "622", "6mm", "-62m", "3", "32",
+               "3m", "-4", "-42m", "2", "222", "m", "-2", "mm2", "1"]
+   if shape[0] == "elastic":
+    symlist = ["iso", "cub", "hex", "3", "32", "4", "4mm", "ort", "mon"]
+  if shape[0] == "piezoelectric":
+   return pz_dist(self.voigt, form, symlist, rotate, xtol, verbose, printmin)
+  if shape[0] == "elastic":
+   return ela_dist(self.voigt, symlist, rotate, xtol, verbose, printmin)
+##################################################################################
+# Check the shape passed to the Tensor class
+def check_shape(tensor, verbose = True):
+ shape = None
+ error = False
+ try:
+  level1 = len(tensor)
+ except:
+  level1 = 0
+ try:
+  level2 = len(tensor[0])
+ except:
+  level2 = 0
+ try:
+  level3 = len(tensor[0][0])
+ except:
+  level3 = 0
+ try:
+  level4 = len(tensor[0][0][0])
+ except:
+  level4 = 0
+# Cartesian elastic
+ if level1 == 3 and level2 == 3 and level3 == 3 and level4 == 3:
+  for i in range(0,3):
+   try:
+    dim = len(tensor[i])
+    if dim > 3 or dim < 3:
+     error = True
+     break
+   except:
+    error = True
+    break
+   for j in range(0,3):
+    try:
+     dim = len(tensor[i][j])
+     if dim > 3 or dim < 3:
+      error = True
+      break
+    except:
+     error = True
+     break
+    for k in range(0,3):
+     try:
+      dim = len(tensor[i][j][k])
+      if dim > 3 or dim < 3:
+       error = True
+       break
+     except:
+      error = True
+      break
+     for l in range(0,3):
+#     Check that all the elements are numbers and that dimensions
+#     are consistent
+      try:
+       tensor[i][j][k][l] += 0
+      except:
+       error = True
+       break
+  shape = ["elastic", "cartesian"]
+# Voigt elastic
+ if level1 == 6 and level2 == 6 and level3 == 0 and level4 == 0:
+  for i in range(0,6):
+   try:
+    dim = len(tensor[i])
+    if dim > 6 or dim < 6:
+     error = True
+     break
+   except:
+    error = True
+    break
+   for j in range(0,6):
+#   Check that all the elements are numbers and that dimensions
+#   are consistent
+    try:
+     tensor[i][j] += 0
+    except:
+     error = True
+     break
+  shape = ["elastic", "voigt"]
+# Vector elastic
+ if level1 == 21 and level2 == 0 and level3 == 0 and level4 == 0:
+  for i in range(0,21):
+#  Check that all the elements are numbers and that dimensions
+#  are consistent
+   try:
+    tensor[i] += 0
+   except:
+    error = True
+    break
+  shape = ["elastic", "vector"]
+# Cartesian piezoelectric
+ if level1 == 3 and level2 == 3 and level3 == 3 and level4 == 0:
+  for i in range(0,3):
+   try:
+    dim = len(tensor[i])
+    if dim > 3 or dim < 3:
+     error = True
+     break
+   except:
+    error = True
+    break
+   for j in range(0,3):
+    try:
+     dim = len(tensor[i][j])
+     if dim > 3 or dim < 3:
+      error = True
+      break
+    except:
+     error = True
+     break
+    for k in range(0,3):
+#    Check that all the elements are numbers and that dimensions
+#    are consistent
+     try:
+      tensor[i][j][k] += 0
+     except:
+      error = True
+      break
+  shape = ["piezoelectric", "cartesian"]
+# Voigt piezoelectric
+ if level1 == 3 and level2 == 6 and level3 == 0 and level4 == 0:
+  for i in range(0,3):
+   try:
+    dim = len(tensor[i])
+    if dim > 6 or dim < 6:
+     error = True
+     break
+   except:
+    error = True
+    break
+   for j in range(0,6):
+#   Check that all the elements are numbers and that dimensions
+#   are consistent
+    try:
+     tensor[i][j] += 0
+    except:
+     error = True
+     break
+  shape = ["piezoelectric", "voigt"]
+# Vector elastic
+ if level1 == 18 and level2 == 0 and level3 == 0 and level4 == 0:
+  for i in range(0,18):
+#  Check that all the elements are numbers and that dimensions
+#  are consistent
+   try:
+    tensor[i] += 0
+   except:
+    error = True
+    break
+  shape = ["piezoelectric", "vector"]
+# If an error was raised print error message
+ if error or not shape:
+  print_check_shape_error(verbose)
+# Return shape, if not recognized it will be None
+ return shape
+##################################################################################
+def symmetrize_tensor(tensor, shape, verbose):
+ flag = False
+ if shape[0] == "piezoelectric" and shape[1] == "cartesian":
+  for i in range(0,3):
+   for j in range(0,3):
+    for k in range(j,3):
+     if np.abs(tensor[i][j][k] - tensor[i][k][j]) > 0.0001:
+      flag=True
+     temp = 0.5 * (tensor[i][j][k] + tensor[i][k][j])
+     tensor[i][j][k] = temp
+     tensor[i][k][j] = temp
+ if shape[0] == "elastic" and shape[1] == "cartesian":
+  for i in range(0,3):
+   for j in range(i,3):
+    for k in range(i,3):
+     if k > i:
+      l0 = k
+     else:
+      l0 = j
+     for l in range(l0,3):
+      if np.abs(tensor[i][j][k][l] - tensor[i][j][l][k]) > 0.0001 or \
+         np.abs(tensor[i][j][k][l] - tensor[j][i][k][l]) > 0.0001 or \
+         np.abs(tensor[i][j][k][l] - tensor[j][i][l][k]) > 0.0001 or \
+         np.abs(tensor[i][j][k][l] - tensor[k][l][i][j]) > 0.0001 or \
+         np.abs(tensor[i][j][k][l] - tensor[k][l][j][i]) > 0.0001 or \
+         np.abs(tensor[i][j][k][l] - tensor[l][k][i][j]) > 0.0001 or \
+         np.abs(tensor[i][j][k][l] - tensor[l][k][j][i]) > 0.0001:
+       flag=True
+      temp = 0.125 * (tensor[i][j][k][l] + tensor[i][j][l][k] + tensor[j][i][k][l] + tensor[j][i][l][k] +
+                      tensor[k][l][i][j] + tensor[l][k][i][j] + tensor[k][l][j][i] + tensor[l][k][j][i])
+      tensor[i][j][k][l] = temp
+      tensor[i][j][l][k] = temp
+      tensor[j][i][k][l] = temp
+      tensor[j][i][l][k] = temp
+      tensor[k][l][i][j] = temp
+      tensor[l][k][i][j] = temp
+      tensor[k][l][j][i] = temp
+      tensor[l][k][j][i] = temp
+ if shape[0] == "elastic" and shape[1] == "voigt":
+  for i in range(0,6):
+   for j in range(i,6):
+    if np.abs(tensor[i][j] - tensor[j][i]) > 0.0001:
+     flag=True
+    temp = 0.5 * (tensor[i][j] + tensor[j][i])
+    tensor[i][j] = temp
+    tensor[j][i] = temp
+ if shape[0] == "piezoelectric" and flag:
+  print_pz_tensor_not_symmetric(verbose)
+ if shape[0] == "elastic" and flag:
+  print_ela_tensor_not_symmetric(verbose)
+ return tensor
+##################################################################################
+def normalize_pz_vector(tensor, form):
+ level0=[]
+ for i in range(0,3):
+  for j in range(0,6):
+   k=i*6+j
+   if j < 3:
+    level0.append(tensor[k])
+   else:
+    if form == "e":
+     level0.append(tensor[k]*np.sqrt(2.))
+    if form == "d":
+     level0.append(tensor[k]/np.sqrt(2.))
+ return level0
+##################################################################################
+def normalize_ela_vector(tensor):
+ level0 = []
+ for i in range(0,6):
+  sumi = 0
+  for li in range(0,i+1):
+   sumi += li
+  for j in range(i,6):
+   sumj = 0
+   for lj in range(0,j+1):
+    sumj += lj
+   if j >= i:
+    k = i*6 + j - sumi
+   else:
+    k = j*6 + i - sumj
+   coeff = 1.
+   if i != j:
+    coeff /= np.sqrt(2.)
+   if i >= 3:
+    coeff /= np.sqrt(2.)
+   if j >= 3:
+    coeff /= np.sqrt(2.)
+   level0.append(tensor[k]/coeff)
+ return level0
+##################################################################################
+def get_components(voigt, shape):
+ level0 = []
+ if shape[0] == "piezoelectric":
+  for i in range(0,3):
+   for j in range(0,6):
+    level0.append(voigt[i][j])
+ if shape[0] == "elastic":
+  for i in range(0,6):
+   for j in range(i,6):
+    level0.append(voigt[i][j])
+ return level0
+##################################################################################
+##################################################################################
+##### End of Tensor class and basic functions                                #####
+##################################################################################
+##################################################################################
 
+
+
+
+
+##################################################################################
+##################################################################################
+##### Define some error/warning printing functions. All of these functions   #####
+##### take the "verbose" variable as input, so that the messages can be      #####
+##### switched off                                                           #####
+##################################################################################
+##################################################################################
+# Prints an error if there is an attempt to initialize the Tensor class with
+# a list with the wrong shape
+def print_check_shape_error(verbose):
+ if verbose:
+  print "                                                                   "
+  print "**************************** E R R O R ****************************"
+  print "The material tensor you have defined has an unknown shape. Please  "
+  print "check that the dimensions are compatible with the acceptable ones: "
+  print "                                                                   "
+  print " Elastic: 3x3x3x3 (Cartesian), 6x6 (Voigt), 21 (vector)            "
+  print "                                                                   "
+  print " Piezoelectric: 3x3x3 (Cartesian), 3x6 (Voigt), 18 (vector)        "
+  print "**************************** E R R O R ****************************"
+  print "                                                                   "
+##################################################################################
+def print_no_form_warning(verbose):
+ if verbose:
+  print "                                                                   "
+  print "************************** W A R N I N G **************************"
+  print "Warning! You have not defined a form (keyword \"form\") for your   "
+  print "piezoelectric tensor, I'm using e_ij by default (form = \"e\").    "
+  print "You can also use the d_ij by specifying form = \"d\". Both forms   "
+  print "make use of the same projectors for all the piezoelectric point    "
+  print "groups but have a different normalizing factors in vector          "
+  print "representation that need to be accounted for.                      "
+  print "************************** W A R N I N G **************************"
+  print "                                                                   "
+##################################################################################
+def print_pz_tensor_not_symmetric(verbose):
+ if verbose:
+  print "                                                                   "
+  print "************************** W A R N I N G **************************"
+  print "Warning! Your piezo tensor is not symmetric, I'm symmetrizing it!  "
+  print "************************** W A R N I N G **************************"
+  print "                                                                   "
+##################################################################################
+def print_ela_tensor_not_symmetric(verbose):
+ if verbose:
+  print "                                                                   "
+  print "************************** W A R N I N G **************************"
+  print "Warning! Your elastic tensor is not symmetric, I'm symmetrizing it!"
+  print "************************** W A R N I N G **************************"
+  print "                                                                   "
+##################################################################################
+##################################################################################
+##### End of printing functions                                              #####
+##################################################################################
+##################################################################################
+
+
+
+
+
+##################################################################################
 ##################################################################################
 ##### All the functions for manipulation of piezoelectric tensors are below  #####
 ##################################################################################
+##################################################################################
 # Turns PZ tensor in Voigt notation to vector (preserving the norm)
 # d_ij and e_ij forms have a different vector representation
-def vectorize_pz_voigt(e_voigt, form = None, verbose = True):
- if not form or form not in ["e", "d"]:
-  form = "e"
-  if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
-   print "by default (form = \"e\"). You can also use the d_ij by specifying "
-   print "form = \"d\". Both forms use the same projectors for all the       "
-   print "piezoelectric point groups but have a different normalizing factors"
-   print "in vector representation that need to be accounted for.            "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+def vectorize_pz_voigt(e_voigt, form):
  result=[]
  for i in range(0,3):
   for j in range(0,6):
@@ -85,21 +531,9 @@ def vectorize_pz_voigt(e_voigt, form = None, verbose = True):
     if form == "d":
      result.append(e_voigt[i][j]/np.sqrt(2.))
  return result
-
+##################################################################################
 # Turns PZ vector (assumed to preserve the norm) to tensor in Voigt notation
-def tensorize_pz_voigt(vector_e_voigt, form = None, verbose = True):
- if not form or form not in ["e", "d"]:
-  form = "e"
-  if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
-   print "by default (form = \"e\"). You can also use the d_ij by specifying "
-   print "form = \"d\". Both forms use the same projectors for all the       "
-   print "piezoelectric point groups but have a different normalizing factors"
-   print "in vector representation that need to be accounted for.            "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+def tensorize_pz_voigt(vector_e_voigt, form):
  level0=[]
  for i in range(0,3):
   level1=[]
@@ -114,22 +548,9 @@ def tensorize_pz_voigt(vector_e_voigt, form = None, verbose = True):
      level1.append(vector_e_voigt[k]*np.sqrt(2.))
   level0.append(level1)
  return level0
-
-
+##################################################################################
 # Transforms PZ tensor in Voigt notation to Cartesian notation
-def pz_voigt_to_cartesian(e_voigt, form = None, verbose = True):
- if not form or form not in ["e", "d"]:
-  form = "e"
-  if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
-   print "by default (form = \"e\"). You can also use the d_ij by specifying "
-   print "form = \"d\". Both forms use the same projectors for all the       "
-   print "piezoelectric point groups but have a different normalizing factors"
-   print "in vector representation that need to be accounted for.            "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+def pz_voigt_to_cartesian(e_voigt, form):
  level0=[]
  for i in range(0,3):
   level1=[]
@@ -153,22 +574,9 @@ def pz_voigt_to_cartesian(e_voigt, form = None, verbose = True):
    level1.append(level2)
   level0.append(level1)
  return level0
-
-
+##################################################################################
 # Transforms PZ tensor in Cartesian notation to Voigt notation
-def pz_cartesian_to_voigt(e_cart, form = None, verbose = True):
- if not form or form not in ["e", "d"]:
-  form = "e"
-  if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
-   print "by default (form = \"e\"). You can also use the d_ij by specifying "
-   print "form = \"d\". Both forms use the same projectors for all the       "
-   print "piezoelectric point groups but have a different normalizing factors"
-   print "in vector representation that need to be accounted for.            "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+def pz_cartesian_to_voigt(e_cart, form):
  level0=[]
  for i_voigt in range(0,3):
   level1=[]
@@ -190,12 +598,12 @@ def pz_cartesian_to_voigt(e_cart, form = None, verbose = True):
      level1.append(2.*e_cart[i][j][k])
   level0.append(level1)
  return level0
-
-
+##################################################################################
 # Performs a rotation operation on a (Cartesian) rank-3 tensor
 def rotate_pz(e_cart,rot_angles):
+ f = np.pi / 180.
  result=np.zeros((3,3,3))
- tx=rot_angles[0] ; ty=rot_angles[1] ; tz=rot_angles[2]
+ tx=f*rot_angles[0] ; ty=f*rot_angles[1] ; tz=f*rot_angles[2]
  Rx=[[1., 0., 0.], [0., np.cos(tx), 0.-np.sin(tx)], [0., np.sin(tx), np.cos(tx)]]
  Ry=[[np.cos(ty), 0., np.sin(ty)], [0., 1., 0.], [0.-np.sin(ty), 0., np.cos(ty)]]
  Rz=[[np.cos(tz), 0.-np.sin(tz), 0.], [np.sin(tz), np.cos(tz), 0.], [0., 0., 1.]]
@@ -210,8 +618,7 @@ def rotate_pz(e_cart,rot_angles):
        temp += R[i][m]*R[j][n]*R[k][o]*e_cart[m][n][o]
     result[i][j][k]=temp
  return result
-
-
+##################################################################################
 # Projects onto a piezoelectric tensor (tensor in vector form)
 def project_pz(vector_e_voigt, sym = None, verbose = True):
 # Available classes, non centrosymmetric point groups and centrosymmetric point groups
@@ -399,9 +806,9 @@ def project_pz(vector_e_voigt, sym = None, verbose = True):
   for i in range(0,18):
    projector[i][i] = c1
 # Carry out the projection
- result=np.dot(projector,vector_e_voigt)
- return result
-
+ proj=np.dot(projector,vector_e_voigt)
+ return proj
+##################################################################################
 # Creates the function to be minimized for an input PZ tensor
 # given in Voigt notation, in terms of the rotation angles
 def res_pz(t, e_voigt, sym = None, form = None, verbose = True):
@@ -409,13 +816,12 @@ def res_pz(t, e_voigt, sym = None, form = None, verbose = True):
  e_cart=pz_voigt_to_cartesian(e_voigt, form = form)
  rot_e=rotate_pz(e_cart,[tx,ty,tz])
  rot_e_voigt=pz_cartesian_to_voigt(rot_e, form = form)
- rot_vector=vectorize_pz_voigt(rot_e_voigt, form = form, verbose = verbose)
+ rot_vector=vectorize_pz_voigt(rot_e_voigt, form = form)
  proj_rot_vector=project_pz(rot_vector,sym, verbose = verbose)
  res=rot_vector-proj_rot_vector
  result=np.dot(res,res)
  return result
-
-
+##################################################################################
 # Checks for the possible symmetry projections and gives the Euclidean
 # distance for each of them. This allows to find out the most probable underlying
 # symmetry of the tensor. Note that the distance will in general be reduced
@@ -455,7 +861,7 @@ def pz_dist(e_voigt, form = None,
   print "Symmetry     Euclidean distance                                    "
   print "--------     ------------------                                    "
   for sym in symlist:
-   v = vectorize_pz_voigt(e_voigt, form = form, verbose = False)
+   v = vectorize_pz_voigt(e_voigt, form = form)
    vp = project_pz(v, sym)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
@@ -477,11 +883,10 @@ def pz_dist(e_voigt, form = None,
    et = pz_voigt_to_cartesian(e_voigt, form = form)
    rotet = rotate_pz(et, topt)
    rot_voigt = pz_cartesian_to_voigt(rotet, form = form)
-   v = vectorize_pz_voigt(rot_voigt, form = form, verbose = False)
+   v = vectorize_pz_voigt(rot_voigt, form = form)
    vp = project_pz(v, sym = sym, verbose=False)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
-   topt[0] *= 180./np.pi ; topt[1] *= 180./np.pi ; topt[2] *= 180./np.pi
    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
 #  Take symmetry planes into account
    if sym == "iso" or sym in cspointgroups:
@@ -499,20 +904,23 @@ def pz_dist(e_voigt, form = None,
   print "                                                                   "
  return result
 ##################################################################################
+##################################################################################
 ############# End of functions for piezoelectric tensor manipulation #############
+##################################################################################
 ##################################################################################
 
 
 
 
+##################################################################################
 ##################################################################################
 ####### All the functions for manipulation of stiffness tensors are below  #######
 ##################################################################################
+##################################################################################
 # Turns elastic tensor in Voigt notation to vector (preserving the norm)
 # it also symmetrizes the tensor in case it's not already symmetric
-def vectorize_ela_voigt(c_voigt, verbose = True):
+def vectorize_ela_voigt(c_voigt):
  result=[]
- flag = False
  for i in range(0,6):
   for j in range(i,6):
    coeff = 1.
@@ -523,16 +931,8 @@ def vectorize_ela_voigt(c_voigt, verbose = True):
    if j >= 3:
     coeff *= np.sqrt(2.)
    result.append(coeff*(c_voigt[i][j]+c_voigt[j][i])/2.)
-   if np.abs(c_voigt[i][j] - c_voigt[j][i]) > 0.01 and not flag and verbose:
-    print "                                                                   "
-    print "************************** W A R N I N G **************************"
-    print "Warning! Your elastic tensor is not symmetric, I'm symmetrizing it!"
-    print "************************** W A R N I N G **************************"
-    print "                                                                   "
-    flag = True
  return result
-
-
+##################################################################################
 # Turns elastic vector (assumed to preserve the norm) to tensor in Voigt notation
 def tensorize_ela_voigt(vector_c_voigt):
  level0 = []
@@ -559,8 +959,7 @@ def tensorize_ela_voigt(vector_c_voigt):
    level1.append(vector_c_voigt[k]/coeff)
   level0.append(level1)
  return level0
-
-
+##################################################################################
 # Transforms elastic tensor in Voigt notation to Cartesian notation
 def ela_voigt_to_cartesian(c_voigt):
  level0=[]
@@ -594,8 +993,7 @@ def ela_voigt_to_cartesian(c_voigt):
    level1.append(level2)
   level0.append(level1)
  return level0
-
-
+##################################################################################
 # Transforms elastic tensor in Cartesian notation to Voigt notation
 def ela_cartesian_to_voigt(c_cart):
  level0=[]
@@ -625,12 +1023,12 @@ def ela_cartesian_to_voigt(c_cart):
     level1.append(c_cart[i][j][k][l])
   level0.append(level1)
  return level0
-
-
+##################################################################################
 # Performs a rotation operation on a (Cartesian) rank-4 tensor
 def rotate_ela(c_cart, rot_angles):
+ f = np.pi / 180.
  result=np.zeros((3,3,3,3))
- tx=rot_angles[0] ; ty=rot_angles[1] ; tz=rot_angles[2]
+ tx=f*rot_angles[0] ; ty=f*rot_angles[1] ; tz=f*rot_angles[2]
  Rx=[[1., 0., 0.], [0., np.cos(tx), 0.-np.sin(tx)], [0., np.sin(tx), np.cos(tx)]]
  Ry=[[np.cos(ty), 0., np.sin(ty)], [0., 1., 0.], [0.-np.sin(ty), 0., np.cos(ty)]]
  Rz=[[np.cos(tz), 0.-np.sin(tz), 0.], [np.sin(tz), np.cos(tz), 0.], [0., 0., 1.]]
@@ -647,8 +1045,7 @@ def rotate_ela(c_cart, rot_angles):
          temp += R[i][m]*R[j][n]*R[k][o]*R[l][p]*c_cart[m][n][o][p]
      result[i][j][k][l]=temp
  return result
-
-
+##################################################################################
 # Projects onto an elastic tensor (tensor in vector form)
 def project_ela(vector_c_voigt, sym = None, verbose = True):
 # Available classes and point groups
@@ -830,10 +1227,9 @@ def project_ela(vector_c_voigt, sym = None, verbose = True):
   for i in range(0,21):
    projector[i][i] = c1
 # Carry out the projection
- result=np.dot(projector,vector_c_voigt)
- return result
-
-
+ proj=np.dot(projector,vector_c_voigt)
+ return proj
+##################################################################################
 # Creates the function to be minimized for an input elastic tensor
 # given in Voigt notation, in terms of the rotation angles
 def res_ela(t, c_voigt, sym = None, verbose = False):
@@ -841,13 +1237,12 @@ def res_ela(t, c_voigt, sym = None, verbose = False):
  c_cart=ela_voigt_to_cartesian(c_voigt)
  rot_c=rotate_ela(c_cart,[tx,ty,tz])
  rot_c_voigt=ela_cartesian_to_voigt(rot_c)
- rot_vector=vectorize_ela_voigt(rot_c_voigt, verbose = verbose)
+ rot_vector=vectorize_ela_voigt(rot_c_voigt)
  proj_rot_vector=project_ela(rot_vector, sym = sym, verbose = verbose)
  res=rot_vector-proj_rot_vector
  result=np.dot(res,res)
  return result
-
-
+##################################################################################
 # Checks for the possible symmetry projections and gives the Euclidean
 # distance for each of them. This allows to find out the most probable underlying
 # symmetry of the tensor. Note that the distance will in general be reduced
@@ -873,7 +1268,7 @@ def ela_dist(c_voigt,
   print "Symmetry     Euclidean distance                                    "
   print "--------     ------------------                                    "
   for sym in symlist:
-   v = vectorize_ela_voigt(c_voigt, verbose)
+   v = vectorize_ela_voigt(c_voigt)
    vp = project_ela(v, sym)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
@@ -899,7 +1294,6 @@ def ela_dist(c_voigt,
    vp = project_ela(v, sym = sym, verbose=False)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
-   topt[0] *= 180./np.pi ; topt[1] *= 180./np.pi ; topt[2] *= 180./np.pi
    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
 #  Take symmetry planes into account
    if sym == "iso":
@@ -915,5 +1309,7 @@ def ela_dist(c_voigt,
   print "                                                                   "
  return result
 ##################################################################################
+##################################################################################
 ############### End of functions for stiffness tensor manipulation ###############
+##################################################################################
 ##################################################################################

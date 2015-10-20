@@ -1,10 +1,13 @@
 -----------------------------------------------------------------------
 Todo list:
 
-* F001: Implement tensor form recognition so that all functions can be used
-  without the user's need to specify the form of the tensor (exept for
-  "d" versus "e" form of the PZ tensor)
-
 * F002: Extend documentation to include the definition of PZ functions
+
+* F003: Include support for elastic tensor in elastic compliance form,
+  i.e., implement support for "C" vs "S" forms of the tensor.
 -----------------------------------------------------------------------
 Granted:
+
+* F001: Implement tensor form recognition so that all functions can be used
+  without the user's need to specify the form of the tensor (exept for
+  "d" versus "e" form of the PZ tensor) - Granted in v0.2 release

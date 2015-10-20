@@ -1,4 +1,19 @@
 -----------------------------------------------------------------------
+20 October 2015
+
+MattPy v0.2
+
+* Created the Tensor class for a more "pythonic" behavior of the
+  package. Now the tensor if defined as an instance of this class,
+  e.g., t = Tensor(). Rotations, projections, etc. are now available
+  as methods of this class, e.g., t.rotate().
+
+* Implemented the automatic detection of the tensor shape. The user
+  can now use the Tensor class using lists of dimensions 3x3x3x3, 6x6,
+  21, 3x3x3, 3x6 and 18. MattPy will automatically detect the shape
+  of the tensor.
+
+-----------------------------------------------------------------------
 01 October 2015
 
 MattPy v0.1 first release:
