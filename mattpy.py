@@ -658,9 +658,9 @@ def project_lat(vector, sym = None, verbose = True):
     or sym == "6mm" or sym == "-62m" or sym == "6/mmm":
   c1 = 1./2. ; c2 = -1./4. ; c3 = np.sqrt(3.)/4. ; c4 = 1./8. ; c5 = -np.sqrt(3.)/8.
   c6 = 3./8. ; c7 = 1.
-  projector[0][0] = c1 ; projector[0][3] = c2 ; projector[0][4] = c3
-  projector[3][0] = c2 ; projector[3][3] = c4 ; projector[3][4] = c5
-  projector[4][0] = c3 ; projector[4][3] = c5 ; projector[4][4] = c6
+  projector[0][0] = c1 ; projector[0][1] = c2 ; projector[0][4] = c3
+  projector[1][0] = c2 ; projector[1][1] = c4 ; projector[1][4] = c5
+  projector[4][0] = c3 ; projector[4][1] = c5 ; projector[4][4] = c6
   projector[8][8] = c7
  if sym == "rho":
   print "Not implemented!"
