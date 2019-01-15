@@ -43,7 +43,7 @@
 #                        Tensor of Lower Symmetry"                               #
 #                    Journal of Elasticity 85, 215 (2006)                        #
 #                                                                                #
-###               Distribution last updated on 20 Oct. 2015                    ###
+###               Distribution last updated on 12 Jan. 2019                    ###
 #####                                                                        #####
 ##################################################################################
 ##################################################################################
@@ -88,6 +88,7 @@ class Tensor:
      vector = tensor
     voigt = tensorize_pz_voigt(vector, form)
     cartesian = pz_voigt_to_cartesian(voigt, form)
+   components = get_components(voigt, shape)
 # Process an elastic tensor
   if shape[0] == "elastic":
    if shape[1] == "voigt":
@@ -105,8 +106,14 @@ class Tensor:
      vector = tensor
     voigt = tensorize_ela_voigt(vector)
     cartesian = ela_voigt_to_cartesian(voigt)
-# Other stuff
-  components = get_components(voigt, shape)
+   components = get_components(voigt, shape)
+# Process a lattice matrix
+  if shape[0] == "lattice":
+   if shape[1] == "cartesian":
+    cartesian = np.array(tensor)
+    voigt = None
+    vector = cartesian.flatten()
+    components = cartesian.flatten()
 # Pass values to self
   self.form = form
   self.vector = vector
@@ -122,11 +129,17 @@ class Tensor:
    cartesian = rotate_pz(self.cartesian, angles)
    voigt = pz_cartesian_to_voigt(cartesian, form)
    vector = vectorize_pz_voigt(voigt, form)
+   components = get_components(voigt, shape)
   if shape[0] == "elastic":
    cartesian = rotate_ela(self.cartesian, angles)
    voigt = ela_cartesian_to_voigt(cartesian)
    vector = vectorize_ela_voigt(voigt)
-  components = get_components(voigt, shape)
+   components = get_components(voigt, shape)
+  if shape[0] == "lattice":
+   cartesian = rotate_lat(self.cartesian, angles)
+   voigt = None
+   vector = cartesian.flatten()
+   components = cartesian.flatten()
   self.vector = vector
   self.voigt = voigt
   self.cartesian = cartesian
@@ -159,6 +172,15 @@ class Tensor:
    voigt = tensorize_ela_voigt(vector)
    components = get_components(voigt, shape)
    cartesian = ela_voigt_to_cartesian(voigt)
+  if shape[0] == "lattice":
+   proj = project_lat(self.vector, sym, verbose)
+   vector = []
+   for i in range(0,9):
+    vector.append(proj[i])
+   vector = np.array(vector)
+   voigt = None
+   components = vector.copy()
+   cartesian = lat_components_to_cartesian(components)
   if shapeout == "vector":
    return vector
   if shapeout == "components":
@@ -181,10 +203,14 @@ class Tensor:
                "3m", "-4", "-42m", "2", "222", "m", "-2", "mm2", "1"]
    if shape[0] == "elastic":
     symlist = ["iso", "cub", "hex", "3", "32", "4", "4mm", "ort", "mon"]
+   if shape[0] == "lattice":
+    symlist = ["hex"]
   if shape[0] == "piezoelectric":
    return pz_dist(self.voigt, form, symlist, rotate, xtol, verbose, printmin)
   if shape[0] == "elastic":
    return ela_dist(self.voigt, symlist, rotate, xtol, verbose, printmin)
+  if shape[0] == "lattice":
+   return lat_dist(self.vector, symlist, rotate, xtol, verbose, printmin)
 ##################################################################################
 # Check the shape passed to the Tensor class
 def check_shape(tensor, verbose = True):
@@ -324,7 +350,7 @@ def check_shape(tensor, verbose = True):
      error = True
      break
   shape = ["piezoelectric", "voigt"]
-# Vector elastic
+# Vector piezoelectric
  if level1 == 18 and level2 == 0 and level3 == 0 and level4 == 0:
   for i in range(0,18):
 #  Check that all the elements are numbers and that dimensions
@@ -335,6 +361,26 @@ def check_shape(tensor, verbose = True):
     error = True
     break
   shape = ["piezoelectric", "vector"]
+# Cartesian lattice
+ if level1 == 3 and level2 == 3 and level3 == 0 and level4 == 0:
+  for i in range(0,3):
+   try:
+    dim = len(tensor[i])
+    if dim > 3 or dim < 3:
+     error = True
+     break
+   except:
+    error = True
+    break
+   for j in range(0,3):
+#   Check that all the elements are numbers and that dimensions
+#   are consistent
+    try:
+     tensor[i][j] += 0
+    except:
+     error = True
+     break
+  shape = ["lattice", "cartesian"]
 # If an error was raised print error message
  if error or not shape:
   print_check_shape_error(verbose)
@@ -482,7 +528,7 @@ def print_no_form_warning(verbose):
   print "piezoelectric tensor, I'm using e_ij by default (form = \"e\").    "
   print "You can also use the d_ij by specifying form = \"d\". Both forms   "
   print "make use of the same projectors for all the piezoelectric point    "
-  print "groups but have a different normalizing factors in vector          "
+  print "groups but have different normalizing factors in vector            "
   print "representation that need to be accounted for.                      "
   print "************************** W A R N I N G **************************"
   print "                                                                   "
@@ -505,6 +551,208 @@ def print_ela_tensor_not_symmetric(verbose):
 ##################################################################################
 ##################################################################################
 ##### End of printing functions                                              #####
+##################################################################################
+##################################################################################
+
+
+
+
+
+##################################################################################
+##################################################################################
+##### All the functions for manipulation of lattice matrices are below       #####
+##################################################################################
+##################################################################################
+##################################################################################
+# Performs a rotation operation on a (Cartesian) rank-3 tensor
+def rotate_lat(e_cart,rot_angles):
+ f = np.pi / 180.
+ result=np.zeros((3,3))
+ tx=f*rot_angles[0] ; ty=f*rot_angles[1] ; tz=f*rot_angles[2]
+ Rx=[[1., 0., 0.], [0., np.cos(tx), 0.-np.sin(tx)], [0., np.sin(tx), np.cos(tx)]]
+ Ry=[[np.cos(ty), 0., np.sin(ty)], [0., 1., 0.], [0.-np.sin(ty), 0., np.cos(ty)]]
+ Rz=[[np.cos(tz), 0.-np.sin(tz), 0.], [np.sin(tz), np.cos(tz), 0.], [0., 0., 1.]]
+ R=np.dot(Rz,np.dot(Ry,Rx))
+ for i in range(0,3):
+  for j in range(0,3):
+   temp = 0.
+   for m in range(0,3):
+    for n in range(0,3):
+     temp += R[i][m]*R[j][n]*e_cart[m][n]
+   result[i][j] = temp
+ return result
+##################################################################################
+# Transforms from a flat array of components to a 3x3 cartesian representation
+def lat_components_to_cartesian(e_components):
+ e_cart = np.zeros([3,3])
+ k = 0
+ for i in range(0,3):
+  for j in range(0,3):
+   e_cart[i][j] = e_components[k]
+   k += 1
+ return e_cart
+##################################################################################
+# Projects onto a given reference lattice
+def project_lat(vector, sym = None, verbose = True):
+# Available classes and point groups ("iso" does not apply here)
+ classes = ["cub", "hex", "hex60", "rho", "tig", "tet", "ort", "mon", "tic"]
+ pointgroups = ["23", "m-3", "432", "-43m", "m-3m", "6", "-6", "6/m",
+                "622", "6mm", "-62m", "6/mmm", "3", "-3", "32", "3m",
+                "-3m", "4", "-4", "4/m", "422", "4mm", "-42m", "4/mmm",
+                "2", "2/m", "222", "m", "-2", "mm2", "mmm", "1", "-1"]
+# Default to "cub" if sym is not defined and print warning (warning can
+# be switched off with verbose = False)
+ if not sym:
+  sym = "cub"
+  if verbose:
+   print "                                                                   "
+   print "************************** W A R N I N G **************************"
+   print "Warning! You have not defined a symmetry, using cubic lattice     !"
+   print "************************** W A R N I N G **************************"
+   print "                                                                   "
+# Print warning and default to "cub" if symmetry is not on the list
+ if sym not in classes:
+  sym = "cub"
+  if verbose:
+   print "                                                                   "
+   print "************************** W A R N I N G **************************"
+   print "Warning! I could not understand the symmetry you have defined,     "
+   print "using cubic lattice instead! The list of available symmetries      "
+   print "from which you have to choose (\"sym\" keyword) is:                "
+   print "Crystal classes:                                                   "
+   print classes
+   print "Point groups:                                                      "
+   print pointgroups
+   print "                                                                   "
+   print "Note that hexagonal lattices can be defined with angles of either  "
+   print "120 degrees (canonical representation, use \"hex\" or any hexagonal  "
+   print "point group), 60 degrees (use \"hex60\"), or in rhombohedral         "
+   print "representation (use \"rho\")                                         "
+   print "************************** W A R N I N G **************************"
+   print "                                                                   "
+# If user does not give a point group (but a class instead) then a default
+# point group compatible with that class will be assigned when the class
+# has more than one independent form for the elastic tensor (i.e. the two
+# forms differ by more than modulo a rotation). We make this opaque to the
+# user for lattice projections.
+ defaultpg = {"tig": "3", "tet": "4"}
+ if defaultpg.get(sym):
+  oldsym = sym
+  sym = defaultpg[oldsym]
+  if 0:
+   print "                                                                   "
+   print "************************** W A R N I N G **************************"
+   print "Warning! You have chosen a crystal class (", oldsym, ") with more  "
+   print "than one independent form of the elastic tensor! I am defaulting to"
+   print "point group", defaultpg[oldsym], ".                                "
+   print "************************** W A R N I N G **************************"
+   print "                                                                   "
+# Initialize projector
+ projector=np.zeros((9,9))
+# Obtain matrix elements <----------------------- FIX THIS, I NEED TO ADD ALL THE LATTICE SYSTEMS WITH MATHEMATICA
+# Cubic
+ if sym == "cub" or sym == "23" or sym == "m-3" or sym == "432" or sym == "-43m" or sym == "m-3m":
+  print "Not implemented!"
+# Hexagonal
+ if sym == "hex" or sym == "6" or sym == "-6" or sym == "6/m" or sym == "622" \
+    or sym == "6mm" or sym == "-62m" or sym == "6/mmm":
+  c1 = 1./2. ; c2 = -1./4. ; c3 = np.sqrt(3.)/4. ; c4 = 1./8. ; c5 = -np.sqrt(3.)/8.
+  c6 = 3./8. ; c7 = 1.
+  projector[0][0] = c1 ; projector[0][3] = c2 ; projector[0][4] = c3
+  projector[3][0] = c2 ; projector[3][3] = c4 ; projector[3][4] = c5
+  projector[4][0] = c3 ; projector[4][3] = c5 ; projector[4][4] = c6
+  projector[8][8] = c7
+ if sym == "rho":
+  print "Not implemented!"
+# Trigonal (point groups 3 and -3)
+ if sym == "3" or sym == "-3":
+  print "Not implemented!"
+# Trigonal (point groups 32, 3m and -3m)
+ if sym == "32" or sym == "3m" or sym == "-3m":
+  print "Not implemented!"
+# Tetragonal (point groups 4, -4, 4/m)
+ if sym == "4" or sym == "-4" or sym == "4/m":
+  print "Not implemented!"
+# Tetragonal (point groups 422, 4mm, -42m, 4/mmm)
+ if sym == "422" or sym == "4mm" or sym == "-42m" or sym == "4/mmm":
+  print "Not implemented!"
+# Orthorhombic
+ if sym == "ort" or sym == "222" or sym == "mm2" or sym == "mmm":
+  print "Not implemented!"
+# Monoclinic
+ if sym == "mon" or sym == "2" or sym == "2/m" or sym == "m" or sym == "-2":
+  print "Not implemented!"
+# Triclinic
+ if sym == "tic" or sym == "1" or sym == "-1":
+  c1 = 1.
+  for i in range(0,9):
+   projector[i][i] = c1
+# Carry out the projection
+ proj=np.dot(projector,vector)
+ return proj
+##################################################################################
+def res_lat(t, vector, sym = None, verbose = False):
+ tx=t[0] ; ty=t[1] ; tz=t[2]
+ c_cart=lat_components_to_cartesian(vector)
+ rot_c=rotate_lat(c_cart,[tx,ty,tz])
+ rot_vector=np.array(rot_c).flatten()
+ proj_rot_vector=project_lat(rot_vector, sym = sym, verbose = verbose)
+ res=rot_vector-proj_rot_vector
+ result=np.dot(res,res)
+ return result
+##################################################################################
+# <---------------------------------- FIX THIS. THE SYMLIST SHOULD CONTAIN ALL OF THEM
+def lat_dist(vector,
+             symlist = ["hex"],
+             rotate = False, xtol = 1e-8, verbose = True, printmin = False):
+ from scipy.optimize import fmin
+ disp = 0
+ if printmin:
+  disp = 1
+ result = []
+ if not rotate:
+  print "                                                                   "
+  print "************************** R E S U L T S **************************"
+  print "Results without rotation optimization                              "
+  print "                                                                   "
+  print "Symmetry     Euclidean distance                                    "
+  print "--------     ------------------                                    "
+  for sym in symlist:
+   v = vector.copy()
+   vp = project_lat(v, sym)
+   edist2 = np.dot(v-vp,v-vp)
+   edist = np.sqrt(edist2)
+   print "%8s         %7.4f Angst." % (sym, edist)
+   result.append([sym, edist])
+  print "************************** R E S U L T S **************************"
+  print "                                                                   "
+ if rotate:
+  print "                                                                   "
+  print "************************** R E S U L T S **************************"
+  print "Results with rotation optimization                                 "
+  print "                                                                   "
+  print "Symmetry     Euclidean distance     Angles tx,     ty,     tz      "
+  print "--------     ------------------     -------------------------------"
+  for sym in symlist:
+   topt = [0., 0., 0.]
+   topt = fmin(res_lat, x0=[0,0,0], xtol=xtol, args=(vector, sym, verbose), disp=disp)
+   ct = lat_components_to_cartesian(vector)
+   rotct = rotate_lat(ct, topt)
+   v = np.array(rotct).flatten()
+   vp = project_lat(v, sym = sym, verbose=False)
+   edist2 = np.dot(v-vp,v-vp)
+   edist = np.sqrt(edist2)
+   printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
+   print "%8s         %7.2f Angst.       %s %s %s  deg." \
+         % (sym, edist, printangles[0], printangles[1], printangles[2])
+   result.append([sym, edist, topt[0], topt[1], topt[2]])
+  print "************************** R E S U L T S **************************"
+  print "                                                                   "
+ return result
+##################################################################################
+##################################################################################
+##################################################################################
+##### End of functions for lattice matrix manipulation                       #####
 ##################################################################################
 ##################################################################################
 
