@@ -191,7 +191,7 @@ class Tensor:
    return cartesian
 # Distances method
  def get_distances(self, form = None, symlist = None,
-                   rotate = False, xtol = 1e-8, verbose = None, printmin = False):
+                   rotate = False, xtol = 1e-8, verbose = None, printmin = False, normalize=False):
   if verbose == None:
    verbose = self.verbose
   if form == None:
@@ -206,11 +206,11 @@ class Tensor:
    if shape[0] == "lattice":
     symlist = ["hex"]
   if shape[0] == "piezoelectric":
-   return pz_dist(self.voigt, form, symlist, rotate, xtol, verbose, printmin)
+   return pz_dist(self.voigt, form, symlist, rotate, xtol, verbose, printmin, normalize)
   if shape[0] == "elastic":
-   return ela_dist(self.voigt, symlist, rotate, xtol, verbose, printmin)
+   return ela_dist(self.voigt, symlist, rotate, xtol, verbose, printmin, normalize)
   if shape[0] == "lattice":
-   return lat_dist(self.vector, symlist, rotate, xtol, verbose, printmin)
+   return lat_dist(self.vector, symlist, rotate, xtol, verbose, printmin, normalize)
 ##################################################################################
 # Check the shape passed to the Tensor class
 def check_shape(tensor, verbose = True):
