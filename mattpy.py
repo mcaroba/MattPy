@@ -704,7 +704,7 @@ def res_lat(t, vector, sym = None, verbose = False):
 # <---------------------------------- FIX THIS. THE SYMLIST SHOULD CONTAIN ALL OF THEM
 def lat_dist(vector,
              symlist = ["hex"],
-             rotate = False, xtol = 1e-8, verbose = True, printmin = False):
+             rotate = False, xtol = 1e-8, verbose = True, printmin = False, normalize=False):
  from scipy.optimize import fmin
  disp = 0
  if printmin:
@@ -721,7 +721,10 @@ def lat_dist(vector,
   for sym in symlist:
    v = vector.copy()
    vp = project_lat(v, sym)
-   edist2 = np.dot(v-vp,v-vp)
+   if normalize:
+    edist2 = np.dot(v-vp,v-vp) / np.dot(v,v)
+   else:
+    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    if verbose:
     print("%8s         %7.4f Angst." % (sym, edist))
@@ -744,7 +747,10 @@ def lat_dist(vector,
    rotct = rotate_lat(ct, topt)
    v = np.array(rotct).flatten()
    vp = project_lat(v, sym = sym, verbose=False)
-   edist2 = np.dot(v-vp,v-vp)
+   if normalize:
+    edist2 = np.dot(v-vp,v-vp) / np.dot(v,v)
+   else:
+    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
    if verbose:
@@ -1088,7 +1094,7 @@ def res_pz(t, e_voigt, sym = None, form = None, verbose = True):
 def pz_dist(e_voigt, form = None,
             symlist = ["432", "-43m", "6", "-6", "622", "6mm", "-62m", "3", "32", "3m",
                        "-4", "-42m", "2", "222", "m", "-2", "mm2", "1"],
-            rotate = False, xtol = 1e-8, verbose = True, printmin = False):
+            rotate = False, xtol = 1e-8, verbose = True, printmin = False, normalize=False):
  from scipy.optimize import fmin
  cspointgroups = ["m-3", "m-3m", "6/m", "6/mmm", "-3", "-3m", "4/m", "4/mmm", "2/m", "mmm", "-1"]
  disp = 0
@@ -1118,7 +1124,10 @@ def pz_dist(e_voigt, form = None,
   for sym in symlist:
    v = vectorize_pz_voigt(e_voigt, form = form)
    vp = project_pz(v, sym)
-   edist2 = np.dot(v-vp,v-vp)
+   if normalize:
+    edist2 = np.dot(v-vp,v-vp) / np.dot(v,v)
+   else:
+    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    if verbose:
     print("%8s          %7.2f C/m^2" % (sym, edist))
@@ -1143,7 +1152,10 @@ def pz_dist(e_voigt, form = None,
    rot_voigt = pz_cartesian_to_voigt(rotet, form = form)
    v = vectorize_pz_voigt(rot_voigt, form = form)
    vp = project_pz(v, sym = sym, verbose=False)
-   edist2 = np.dot(v-vp,v-vp)
+   if normalize:
+    edist2 = np.dot(v-vp,v-vp) / np.dot(v,v)
+   else:
+    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
 #  Take symmetry planes into account
@@ -1514,7 +1526,7 @@ def res_ela(t, c_voigt, sym = None, verbose = False):
 # in a reduced set. This function requires Scipy.
 def ela_dist(c_voigt,
              symlist = ["iso", "cub", "hex", "3", "32", "4", "4mm", "ort", "mon"],
-             rotate = False, xtol = 1e-8, verbose = True, printmin = False):
+             rotate = False, xtol = 1e-8, verbose = True, printmin = False, normalize=False):
  from scipy.optimize import fmin
  disp = 0
  if printmin:
@@ -1531,7 +1543,10 @@ def ela_dist(c_voigt,
   for sym in symlist:
    v = vectorize_ela_voigt(c_voigt)
    vp = project_ela(v, sym)
-   edist2 = np.dot(v-vp,v-vp)
+   if normalize:
+    edist2 = np.dot(v-vp,v-vp) / np.dot(v,v)
+   else:
+    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    if verbose:
     print("%8s            %7.2f GPa" % (sym, edist))
@@ -1556,7 +1571,10 @@ def ela_dist(c_voigt,
    rot_voigt = ela_cartesian_to_voigt(rotct)
    v = vectorize_ela_voigt(rot_voigt)
    vp = project_ela(v, sym = sym, verbose=False)
-   edist2 = np.dot(v-vp,v-vp)
+   if normalize:
+    edist2 = np.dot(v-vp,v-vp) / np.dot(v,v)
+   else:
+    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
 #  Take symmetry planes into account
