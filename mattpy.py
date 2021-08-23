@@ -2,15 +2,15 @@
 ##################################################################################
 #####                                                                        #####
 ###                                                                            ###
-#    @@@@@      @@@@@                 @@@@      @@@     @@@@@@@@@@               # 
-#    @@@@@@   *@@@@@&      .,,        @@@.     @@@@     @@@#   @@@@              # 
-#   (@@@.@@  &@@ @@@    @@@@@@@@@   @@@@@@@@/@@@@@@@@@ .@@@    &@@@  @@@.   *@@@ # 
-#   @@@@ @@@@@@ %@@@          @@@#   @@@#     %@@@     @@@@@@@@@@@    @@@  #@@@  # 
-#   @@@  ,@@@@  @@@/   @@@@@@@@@@    @@@      @@@%     @@@&%%#*       @@@ (@@@   # 
-#  &@@@   @@.   @@@   @@@%   @@@@   #@@@      @@@     &@@@             @@@@@@    # 
-#  @@@,        @@@@   /@@@@@&@@@*    @@@@@%   @@@@@@  @@@@             @@@@.     # 
-#                                                                      @@@       # 
-#                                                                   @@@@@        #                    
+#    @@@@@      @@@@@                 @@@@      @@@     @@@@@@@@@@               #
+#    @@@@@@   *@@@@@&      .,,        @@@.     @@@@     @@@#   @@@@              #
+#   (@@@.@@  &@@ @@@    @@@@@@@@@   @@@@@@@@/@@@@@@@@@ .@@@    &@@@  @@@.   *@@@ #
+#   @@@@ @@@@@@ %@@@          @@@#   @@@#     %@@@     @@@@@@@@@@@    @@@  #@@@  #
+#   @@@  ,@@@@  @@@/   @@@@@@@@@@    @@@      @@@%     @@@&%%#*       @@@ (@@@   #
+#  &@@@   @@.   @@@   @@@%   @@@@   #@@@      @@@     &@@@             @@@@@@    #
+#  @@@,        @@@@   /@@@@@&@@@*    @@@@@%   @@@@@@  @@@@             @@@@.     #
+#                                                                      @@@       #
+#                                                                   @@@@@        #
 #                                                                                #
 #                               MattPy v0.2                                      #
 #                                                                                #
@@ -43,7 +43,7 @@
 #                        Tensor of Lower Symmetry"                               #
 #                    Journal of Elasticity 85, 215 (2006)                        #
 #                                                                                #
-###               Distribution last updated on 12 Jan. 2019                    ###
+###               Distribution last updated on 20 Aug. 2021                    ###
 #####                                                                        #####
 ##################################################################################
 ##################################################################################
@@ -509,45 +509,45 @@ def get_components(voigt, shape):
 # a list with the wrong shape
 def print_check_shape_error(verbose):
  if verbose:
-  print "                                                                   "
-  print "**************************** E R R O R ****************************"
-  print "The material tensor you have defined has an unknown shape. Please  "
-  print "check that the dimensions are compatible with the acceptable ones: "
-  print "                                                                   "
-  print " Elastic: 3x3x3x3 (Cartesian), 6x6 (Voigt), 21 (vector)            "
-  print "                                                                   "
-  print " Piezoelectric: 3x3x3 (Cartesian), 3x6 (Voigt), 18 (vector)        "
-  print "**************************** E R R O R ****************************"
-  print "                                                                   "
+  print("                                                                   ")
+  print("**************************** E R R O R ****************************")
+  print("The material tensor you have defined has an unknown shape. Please  ")
+  print("check that the dimensions are compatible with the acceptable ones: ")
+  print("                                                                   ")
+  print(" Elastic: 3x3x3x3 (Cartesian), 6x6 (Voigt), 21 (vector)            ")
+  print("                                                                   ")
+  print(" Piezoelectric: 3x3x3 (Cartesian), 3x6 (Voigt), 18 (vector)        ")
+  print("**************************** E R R O R ****************************")
+  print("                                                                   ")
 ##################################################################################
 def print_no_form_warning(verbose):
  if verbose:
-  print "                                                                   "
-  print "************************** W A R N I N G **************************"
-  print "Warning! You have not defined a form (keyword \"form\") for your   "
-  print "piezoelectric tensor, I'm using e_ij by default (form = \"e\").    "
-  print "You can also use the d_ij by specifying form = \"d\". Both forms   "
-  print "make use of the same projectors for all the piezoelectric point    "
-  print "groups but have different normalizing factors in vector            "
-  print "representation that need to be accounted for.                      "
-  print "************************** W A R N I N G **************************"
-  print "                                                                   "
+  print("                                                                   ")
+  print("************************** W A R N I N G **************************")
+  print("Warning! You have not defined a form (keyword \"form\") for your   ")
+  print("piezoelectric tensor, I'm using e_ij by default (form = \"e\").    ")
+  print("You can also use the d_ij by specifying form = \"d\". Both forms   ")
+  print("make use of the same projectors for all the piezoelectric point    ")
+  print("groups but have different normalizing factors in vector            ")
+  print("representation that need to be accounted for.                      ")
+  print("************************** W A R N I N G **************************")
+  print("                                                                   ")
 ##################################################################################
 def print_pz_tensor_not_symmetric(verbose):
  if verbose:
-  print "                                                                   "
-  print "************************** W A R N I N G **************************"
-  print "Warning! Your piezo tensor is not symmetric, I'm symmetrizing it!  "
-  print "************************** W A R N I N G **************************"
-  print "                                                                   "
+  print("                                                                   ")
+  print("************************** W A R N I N G **************************")
+  print("Warning! Your piezo tensor is not symmetric, I'm symmetrizing it!  ")
+  print("************************** W A R N I N G **************************")
+  print("                                                                   ")
 ##################################################################################
 def print_ela_tensor_not_symmetric(verbose):
  if verbose:
-  print "                                                                   "
-  print "************************** W A R N I N G **************************"
-  print "Warning! Your elastic tensor is not symmetric, I'm symmetrizing it!"
-  print "************************** W A R N I N G **************************"
-  print "                                                                   "
+  print("                                                                   ")
+  print("************************** W A R N I N G **************************")
+  print("Warning! Your elastic tensor is not symmetric, I'm symmetrizing it!")
+  print("************************** W A R N I N G **************************")
+  print("                                                                   ")
 ##################################################################################
 ##################################################################################
 ##### End of printing functions                                              #####
@@ -605,31 +605,31 @@ def project_lat(vector, sym = None, verbose = True):
  if not sym:
   sym = "cub"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a symmetry, using cubic lattice     !"
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have not defined a symmetry, using cubic lattice     !")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Print warning and default to "cub" if symmetry is not on the list
  if sym not in classes:
   sym = "cub"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! I could not understand the symmetry you have defined,     "
-   print "using cubic lattice instead! The list of available symmetries      "
-   print "from which you have to choose (\"sym\" keyword) is:                "
-   print "Crystal classes:                                                   "
-   print classes
-   print "Point groups:                                                      "
-   print pointgroups
-   print "                                                                   "
-   print "Note that hexagonal lattices can be defined with angles of either  "
-   print "120 degrees (canonical representation, use \"hex\" or any hexagonal  "
-   print "point group), 60 degrees (use \"hex60\"), or in rhombohedral         "
-   print "representation (use \"rho\")                                         "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! I could not understand the symmetry you have defined,     ")
+   print("using cubic lattice instead! The list of available symmetries      ")
+   print("from which you have to choose (\"sym\" keyword) is:                ")
+   print("Crystal classes:                                                   ")
+   print(classes)
+   print("Point groups:                                                      ")
+   print(pointgroups)
+   print("                                                                   ")
+   print("Note that hexagonal lattices can be defined with angles of either  ")
+   print("120 degrees (canonical representation, use \"hex\" or any hexagonal  ")
+   print("point group), 60 degrees (use \"hex60\"), or in rhombohedral         ")
+   print("representation (use \"rho\")                                         ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # If user does not give a point group (but a class instead) then a default
 # point group compatible with that class will be assigned when the class
 # has more than one independent form for the elastic tensor (i.e. the two
@@ -640,19 +640,19 @@ def project_lat(vector, sym = None, verbose = True):
   oldsym = sym
   sym = defaultpg[oldsym]
   if 0:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have chosen a crystal class (", oldsym, ") with more  "
-   print "than one independent form of the elastic tensor! I am defaulting to"
-   print "point group", defaultpg[oldsym], ".                                "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have chosen a crystal class (", oldsym, ") with more  ")
+   print("than one independent form of the elastic tensor! I am defaulting to")
+   print("point group", defaultpg[oldsym], ".                                ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Initialize projector
  projector=np.zeros((9,9))
 # Obtain matrix elements <----------------------- FIX THIS, I NEED TO ADD ALL THE LATTICE SYSTEMS WITH MATHEMATICA
 # Cubic
  if sym == "cub" or sym == "23" or sym == "m-3" or sym == "432" or sym == "-43m" or sym == "m-3m":
-  print "Not implemented!"
+  print("Not implemented!")
 # Hexagonal
  if sym == "hex" or sym == "6" or sym == "-6" or sym == "6/m" or sym == "622" \
     or sym == "6mm" or sym == "-62m" or sym == "6/mmm":
@@ -663,25 +663,25 @@ def project_lat(vector, sym = None, verbose = True):
   projector[4][0] = c3 ; projector[4][1] = c5 ; projector[4][4] = c6
   projector[8][8] = c7
  if sym == "rho":
-  print "Not implemented!"
+  print("Not implemented!")
 # Trigonal (point groups 3 and -3)
  if sym == "3" or sym == "-3":
-  print "Not implemented!"
+  print("Not implemented!")
 # Trigonal (point groups 32, 3m and -3m)
  if sym == "32" or sym == "3m" or sym == "-3m":
-  print "Not implemented!"
+  print("Not implemented!")
 # Tetragonal (point groups 4, -4, 4/m)
  if sym == "4" or sym == "-4" or sym == "4/m":
-  print "Not implemented!"
+  print("Not implemented!")
 # Tetragonal (point groups 422, 4mm, -42m, 4/mmm)
  if sym == "422" or sym == "4mm" or sym == "-42m" or sym == "4/mmm":
-  print "Not implemented!"
+  print("Not implemented!")
 # Orthorhombic
  if sym == "ort" or sym == "222" or sym == "mm2" or sym == "mmm":
-  print "Not implemented!"
+  print("Not implemented!")
 # Monoclinic
  if sym == "mon" or sym == "2" or sym == "2/m" or sym == "m" or sym == "-2":
-  print "Not implemented!"
+  print("Not implemented!")
 # Triclinic
  if sym == "tic" or sym == "1" or sym == "-1":
   c1 = 1.
@@ -711,28 +711,32 @@ def lat_dist(vector,
   disp = 1
  result = []
  if not rotate:
-  print "                                                                   "
-  print "************************** R E S U L T S **************************"
-  print "Results without rotation optimization                              "
-  print "                                                                   "
-  print "Symmetry     Euclidean distance                                    "
-  print "--------     ------------------                                    "
+  if verbose:
+   print("                                                                   ")
+   print("************************** R E S U L T S **************************")
+   print("Results without rotation optimization                              ")
+   print("                                                                   ")
+   print("Symmetry     Euclidean distance                                    ")
+   print("--------     ------------------                                    ")
   for sym in symlist:
    v = vector.copy()
    vp = project_lat(v, sym)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
-   print "%8s         %7.4f Angst." % (sym, edist)
+   if verbose:
+    print("%8s         %7.4f Angst." % (sym, edist))
    result.append([sym, edist])
-  print "************************** R E S U L T S **************************"
-  print "                                                                   "
+  if verbose:
+   print("************************** R E S U L T S **************************")
+   print("                                                                   ")
  if rotate:
-  print "                                                                   "
-  print "************************** R E S U L T S **************************"
-  print "Results with rotation optimization                                 "
-  print "                                                                   "
-  print "Symmetry     Euclidean distance     Angles tx,     ty,     tz      "
-  print "--------     ------------------     -------------------------------"
+  if verbose:
+   print("                                                                   ")
+   print("************************** R E S U L T S **************************")
+   print("Results with rotation optimization                                 ")
+   print("                                                                   ")
+   print("Symmetry     Euclidean distance     Angles tx,     ty,     tz      ")
+   print("--------     ------------------     -------------------------------")
   for sym in symlist:
    topt = [0., 0., 0.]
    topt = fmin(res_lat, x0=[0,0,0], xtol=xtol, args=(vector, sym, verbose), disp=disp)
@@ -743,11 +747,13 @@ def lat_dist(vector,
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "%7.2f" % topt[2]]
-   print "%8s         %7.2f Angst.       %s %s %s  deg." \
-         % (sym, edist, printangles[0], printangles[1], printangles[2])
+   if verbose:
+    print("%8s         %7.2f Angst.       %s %s %s  deg." \
+          % (sym, edist, printangles[0], printangles[1], printangles[2]))
    result.append([sym, edist, topt[0], topt[1], topt[2]])
-  print "************************** R E S U L T S **************************"
-  print "                                                                   "
+  if verbose:
+   print("************************** R E S U L T S **************************")
+   print("                                                                   ")
  return result
 ##################################################################################
 ##################################################################################
@@ -883,65 +889,65 @@ def project_pz(vector_e_voigt, sym = None, verbose = True):
 # Print warning if user chooses a centrosymmetric point group or isotropy
  if sym in cspointgroups:
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have chosen a centrosymmetric point group, the        "
-   print "projection will be zero!                                           "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have chosen a centrosymmetric point group, the        ")
+   print("projection will be zero!                                           ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
  if sym == "iso":
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have chosen material isotropy, the projection will    "
-   print "be zero!                                                           "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have chosen material isotropy, the projection will    ")
+   print("be zero!                                                           ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Default to "-43m" if sym is not defined and print warning (warning can
 # be switched off with verbose = False)
  if not sym:
   sym = "-43m"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a symmetry, using PG -43m tensor!    "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have not defined a symmetry, using PG -43m tensor!    ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Print warning and default to "-43m" if symmetry is not on the list
  if sym not in classes and sym not in pointgroups:
   sym = "-43m"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! I could not understand the symmetry you have defined,     "
-   print "using PG -43m tensor instead! The list of available symmetries     "
-   print "from which you have to choose (\"sym\" keyword) is:                "
-   print "Crystal classes:                                                   "
-   print classes
-   print "Point groups:                                                      "
-   print pointgroups
-   print "Note! The form of the piezoelectric tensor depends on the specific "
-   print "point group, not only the crystal class. If you choose a crystal   "
-   print "class I will assign a default point group for that class, which may"
-   print "or may not be the one you need to use!                             "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! I could not understand the symmetry you have defined,     ")
+   print("using PG -43m tensor instead! The list of available symmetries     ")
+   print("from which you have to choose (\"sym\" keyword) is:                ")
+   print("Crystal classes:                                                   ")
+   print(classes)
+   print("Point groups:                                                      ")
+   print(pointgroups)
+   print("Note! The form of the piezoelectric tensor depends on the specific ")
+   print("point group, not only the crystal class. If you choose a crystal   ")
+   print("class I will assign a default point group for that class, which may")
+   print("or may not be the one you need to use!                             ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # If user does not give a point group (but a class instead) then a default
 # point group compatible with that class will be assigned when the class
 # has more than one independent form for the piezoelectric tensor (i.e. the two
-# forms differ by more than modulo a rotation) 
+# forms differ by more than modulo a rotation)
  defaultpg = {"cub": "-43m", "hex": "6mm", "tig": "3m", "tet": "4mm", "ort" :"222", "mon": "2", "tic": "1"}
  if defaultpg.get(sym):
   oldsym = sym
   sym = defaultpg[oldsym]
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have chosen a crystal class (", oldsym, ") with more  "
-   print "than one independent form of the piezoelectric tensor! I am        "
-   print "defaulting to point group", defaultpg[oldsym], ".                  "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have chosen a crystal class (", oldsym, ") with more  ")
+   print("than one independent form of the piezoelectric tensor! I am        ")
+   print("defaulting to point group", defaultpg[oldsym], ".                  ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Initialize projector
  projector=np.zeros((18,18))
 # Obtain matrix elements
@@ -1091,39 +1097,43 @@ def pz_dist(e_voigt, form = None,
  if not form:
   form = "e"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a form (keyword \"form\"), using e_ij"
-   print "by default (form = \"e\"). You can also use the d_ij by specifying "
-   print "form = \"d\". Both forms use the same projectors for all the       "
-   print "piezoelectric point groups but have a different normalizing factors"
-   print "in vector representation that need to be accounted for.            "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have not defined a form (keyword \"form\"), using e_ij")
+   print("by default (form = \"e\"). You can also use the d_ij by specifying ")
+   print("form = \"d\". Both forms use the same projectors for all the       ")
+   print("piezoelectric point groups but have a different normalizing factors")
+   print("in vector representation that need to be accounted for.            ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
  result = []
  if not rotate:
-  print "                                                                   "
-  print "************************** R E S U L T S **************************"
-  print "Results without rotation optimization                              "
-  print "                                                                   "
-  print "Symmetry     Euclidean distance                                    "
-  print "--------     ------------------                                    "
+  if verbose:
+   print("                                                                   ")
+   print("************************** R E S U L T S **************************")
+   print("Results without rotation optimization                              ")
+   print("                                                                   ")
+   print("Symmetry     Euclidean distance                                    ")
+   print("--------     ------------------                                    ")
   for sym in symlist:
    v = vectorize_pz_voigt(e_voigt, form = form)
    vp = project_pz(v, sym)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
-   print "%8s          %7.2f C/m^2" % (sym, edist)
+   if verbose:
+    print("%8s          %7.2f C/m^2" % (sym, edist))
    result.append([sym, edist])
-  print "************************** R E S U L T S **************************"
-  print "                                                                   "
+  if verbose:
+   print("************************** R E S U L T S **************************")
+   print("                                                                   ")
  if rotate:
-  print "                                                                   "
-  print "************************** R E S U L T S **************************"
-  print "Results with rotation optimization                                 "
-  print "                                                                   "
-  print "Symmetry     Euclidean distance     Angles tx,     ty,     tz      "
-  print "--------     ------------------     -------------------------------"
+  if verbose:
+   print("                                                                   ")
+   print("************************** R E S U L T S **************************")
+   print("Results with rotation optimization                                 ")
+   print("                                                                   ")
+   print("Symmetry     Euclidean distance     Angles tx,     ty,     tz      ")
+   print("--------     ------------------     -------------------------------")
   for sym in symlist:
    topt = [0., 0., 0.]
    if sym != "iso" or sym not in cspointgroups:
@@ -1145,11 +1155,13 @@ def pz_dist(e_voigt, form = None,
 #      or sym == "6mm" or sym == "-62m" or sym == "6/mmm" or sym == "3" or sym == "-3" \
 #      or sym == "32" or sym == "3m" or sym == "-3m":
 #    printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "    n/a"]
-   print "%8s          %7.2f C/m^2       %s %s %s  deg." \
-         % (sym, edist, printangles[0], printangles[1], printangles[2])
+   if verbose:
+    print("%8s          %7.2f C/m^2       %s %s %s  deg." \
+          % (sym, edist, printangles[0], printangles[1], printangles[2]))
    result.append([sym, edist, topt[0], topt[1], topt[2]])
-  print "************************** R E S U L T S **************************"
-  print "                                                                   "
+  if verbose:
+   print("************************** R E S U L T S **************************")
+   print("                                                                   ")
  return result
 ##################################################################################
 ##################################################################################
@@ -1218,7 +1230,7 @@ def ela_voigt_to_cartesian(c_voigt):
    if i == j:
     i_voigt=i
    else:
-    if (i == 1 and j == 2) or (j == 1 and i == 2): 
+    if (i == 1 and j == 2) or (j == 1 and i == 2):
      i_voigt=3
     elif (i == 0 and j == 2) or (j == 0 and i == 2):
      i_voigt=4
@@ -1230,7 +1242,7 @@ def ela_voigt_to_cartesian(c_voigt):
      if k == l:
       j_voigt=k
      else:
-      if (k == 1 and l == 2) or (l == 1 and k == 2): 
+      if (k == 1 and l == 2) or (l == 1 and k == 2):
        j_voigt=3
       elif (k == 0 and l == 2) or (l == 0 and k == 2):
        j_voigt=4
@@ -1307,42 +1319,42 @@ def project_ela(vector_c_voigt, sym = None, verbose = True):
  if not sym:
   sym = "iso"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have not defined a symmetry, using isotropic tensor  !"
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have not defined a symmetry, using isotropic tensor  !")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Print warning and default to "iso" if symmetry is not on the list
  if sym not in classes and sym not in pointgroups:
   sym = "iso"
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! I could not understand the symmetry you have defined,     "
-   print "using isotropic tensor instead! The list of available symmetries   "
-   print "from which you have to choose (\"sym\" keyword) is:                "
-   print "Crystal classes:                                                   "
-   print classes
-   print "Point groups:                                                      "
-   print pointgroups
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! I could not understand the symmetry you have defined,     ")
+   print("using isotropic tensor instead! The list of available symmetries   ")
+   print("from which you have to choose (\"sym\" keyword) is:                ")
+   print("Crystal classes:                                                   ")
+   print(classes)
+   print("Point groups:                                                      ")
+   print(pointgroups)
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # If user does not give a point group (but a class instead) then a default
 # point group compatible with that class will be assigned when the class
 # has more than one independent form for the elastic tensor (i.e. the two
-# forms differ by more than modulo a rotation) 
+# forms differ by more than modulo a rotation)
  defaultpg = {"tig": "3", "tet": "4"}
  if defaultpg.get(sym):
   oldsym = sym
   sym = defaultpg[oldsym]
   if verbose:
-   print "                                                                   "
-   print "************************** W A R N I N G **************************"
-   print "Warning! You have chosen a crystal class (", oldsym, ") with more  "
-   print "than one independent form of the elastic tensor! I am defaulting to"
-   print "point group", defaultpg[oldsym], ".                                "
-   print "************************** W A R N I N G **************************"
-   print "                                                                   "
+   print("                                                                   ")
+   print("************************** W A R N I N G **************************")
+   print("Warning! You have chosen a crystal class (", oldsym, ") with more  ")
+   print("than one independent form of the elastic tensor! I am defaulting to")
+   print("point group", defaultpg[oldsym], ".                                ")
+   print("************************** W A R N I N G **************************")
+   print("                                                                   ")
 # Initialize projector
  projector=np.zeros((21,21))
 # Obtain matrix elements
@@ -1500,7 +1512,7 @@ def res_ela(t, c_voigt, sym = None, verbose = False):
 # the info from the minimization routine. The list of symmetries to check is
 # complete by default. The user can override this if they're only interested
 # in a reduced set. This function requires Scipy.
-def ela_dist(c_voigt, 
+def ela_dist(c_voigt,
              symlist = ["iso", "cub", "hex", "3", "32", "4", "4mm", "ort", "mon"],
              rotate = False, xtol = 1e-8, verbose = True, printmin = False):
  from scipy.optimize import fmin
@@ -1509,28 +1521,32 @@ def ela_dist(c_voigt,
   disp = 1
  result = []
  if not rotate:
-  print "                                                                   "
-  print "************************** R E S U L T S **************************"
-  print "Results without rotation optimization                              "
-  print "                                                                   "
-  print "Symmetry     Euclidean distance                                    "
-  print "--------     ------------------                                    "
+  if verbose:
+   print("                                                                   ")
+   print("************************** R E S U L T S **************************")
+   print("Results without rotation optimization                              ")
+   print("                                                                   ")
+   print("Symmetry     Euclidean distance                                    ")
+   print("--------     ------------------                                    ")
   for sym in symlist:
    v = vectorize_ela_voigt(c_voigt)
    vp = project_ela(v, sym)
    edist2 = np.dot(v-vp,v-vp)
    edist = np.sqrt(edist2)
-   print "%8s            %7.2f GPa" % (sym, edist)
+   if verbose:
+    print("%8s            %7.2f GPa" % (sym, edist))
    result.append([sym, edist])
-  print "************************** R E S U L T S **************************"
-  print "                                                                   "
+  if verbose:
+   print("************************** R E S U L T S **************************")
+   print("                                                                   ")
  if rotate:
-  print "                                                                   "
-  print "************************** R E S U L T S **************************"
-  print "Results with rotation optimization                                 "
-  print "                                                                   "
-  print "Symmetry     Euclidean distance     Angles tx,     ty,     tz      "
-  print "--------     ------------------     -------------------------------"
+  if verbose:
+   print("                                                                   ")
+   print("************************** R E S U L T S **************************")
+   print("Results with rotation optimization                                 ")
+   print("                                                                   ")
+   print("Symmetry     Euclidean distance     Angles tx,     ty,     tz      ")
+   print("--------     ------------------     -------------------------------")
   for sym in symlist:
    topt = [0., 0., 0.]
    if sym != "iso":
@@ -1550,11 +1566,13 @@ def ela_dist(c_voigt,
       or sym == "6mm" or sym == "-62m" or sym == "6/mmm" or sym == "3" or sym == "-3" \
       or sym == "32" or sym == "3m" or sym == "-3m":
     printangles = ["%7.2f" % topt[0], "%7.2f" % topt[1], "    n/a"]
-   print "%8s            %7.2f GPa       %s %s %s  deg." \
-         % (sym, edist, printangles[0], printangles[1], printangles[2])
+   if verbose:
+    print("%8s            %7.2f GPa       %s %s %s  deg." \
+          % (sym, edist, printangles[0], printangles[1], printangles[2]))
    result.append([sym, edist, topt[0], topt[1], topt[2]])
-  print "************************** R E S U L T S **************************"
-  print "                                                                   "
+  if verbose:
+   print("************************** R E S U L T S **************************")
+   print("                                                                   ")
  return result
 ##################################################################################
 ##################################################################################
